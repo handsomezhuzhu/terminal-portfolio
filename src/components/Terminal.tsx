@@ -9,6 +9,7 @@ import _ from "lodash";
 import Output from "./Output";
 import TermInfo from "./TermInfo";
 import { profile } from "../config/profile";
+import { isDirectory, resolvePath } from "../config/filesystem";
 import {
   CmdNotFound,
   Empty,
@@ -29,6 +30,8 @@ type Command = {
 
 export const commands: Command = [
   { cmd: "about", desc: `about ${profile.displayName}`, tab: 8 },
+  { cmd: "cat", desc: "print file contents", tab: 10 },
+  { cmd: "cd", desc: "change directory", tab: 11 },
   { cmd: "clear", desc: "clear the terminal", tab: 8 },
   { cmd: "echo", desc: "print out anything", tab: 9 },
   { cmd: "education", desc: "background and learning notes", tab: 4 },
@@ -36,6 +39,8 @@ export const commands: Command = [
   { cmd: "gui", desc: "open my main profile", tab: 10 },
   { cmd: "help", desc: "check available commands", tab: 9 },
   { cmd: "history", desc: "view command history", tab: 6 },
+  { cmd: "ls", desc: "list directory contents", tab: 11 },
+  { cmd: "open", desc: "open a .url file", tab: 9 },
   { cmd: "projects", desc: "view featured links and projects", tab: 5 },
   { cmd: "pwd", desc: "print current working directory", tab: 10 },
   { cmd: "socials", desc: "check out useful links", tab: 6 },
@@ -46,10 +51,18 @@ export const commands: Command = [
 
 type Term = {
   arg: string[];
-  history: string[];
+  history: HistoryEntry[];
   rerender: boolean;
   index: number;
+  cwd: string;
+  cdError?: string;
   clearHistory?: () => void;
+};
+
+export type HistoryEntry = {
+  cmd: string;
+  cwd: string;
+  cdError?: string;
 };
 
 export const termContext = createContext<Term>({
@@ -57,6 +70,7 @@ export const termContext = createContext<Term>({
   history: [],
   rerender: false,
   index: 0,
+  cwd: profile.homePath,
 });
 
 const Terminal = () => {
@@ -64,7 +78,11 @@ const Terminal = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [inputVal, setInputVal] = useState("");
-  const [cmdHistory, setCmdHistory] = useState<string[]>(["welcome"]);
+  const [cmdHistory, setCmdHistory] = useState<HistoryEntry[]>([
+    { cmd: "welcome", cwd: profile.homePath },
+  ]);
+  const [cwd, setCwd] = useState(profile.homePath);
+  const [previousCwd, setPreviousCwd] = useState(profile.homePath);
   const [rerender, setRerender] = useState(false);
   const [hints, setHints] = useState<string[]>([]);
   const [pointer, setPointer] = useState(-1);
@@ -76,7 +94,16 @@ const Terminal = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setCmdHistory([inputVal, ...cmdHistory]);
+
+    const commandArray = _.split(_.trim(inputVal), " ");
+    const cdError = getCdError(commandArray, cwd, previousCwd);
+    const nextCwd = getNextCwd(commandArray, cwd, previousCwd);
+
+    setCmdHistory([{ cmd: inputVal, cwd, cdError }, ...cmdHistory]);
+    if (!cdError && nextCwd && nextCwd !== cwd) {
+      setPreviousCwd(cwd);
+      setCwd(nextCwd);
+    }
     setInputVal("");
     setRerender(true);
     setHints([]);
@@ -148,7 +175,7 @@ const Terminal = () => {
 
       if (pointer + 1 === cmdHistory.length) return;
 
-      setInputVal(cmdHistory[pointer + 1]);
+      setInputVal(cmdHistory[pointer + 1].cmd);
       setPointer(prevState => prevState + 1);
       inputRef?.current?.blur();
     }
@@ -163,7 +190,7 @@ const Terminal = () => {
         return;
       }
 
-      setInputVal(cmdHistory[pointer - 1]);
+      setInputVal(cmdHistory[pointer - 1].cmd);
       setPointer(prevState => prevState - 1);
       inputRef?.current?.blur();
     }
@@ -188,7 +215,7 @@ const Terminal = () => {
       )}
       <Form onSubmit={handleSubmit}>
         <label htmlFor="terminal-input">
-          <TermInfo /> <MobileBr />
+          <TermInfo cwd={cwd} /> <MobileBr />
           <MobileSpan>&#62;</MobileSpan>
         </label>
         <Input
@@ -206,33 +233,35 @@ const Terminal = () => {
         />
       </Form>
 
-      {cmdHistory.map((cmdH, index) => {
-        const commandArray = _.split(_.trim(cmdH), " ");
+      {cmdHistory.map((historyEntry, index) => {
+        const commandArray = _.split(_.trim(historyEntry.cmd), " ");
         const validCommand = _.find(commands, { cmd: commandArray[0] });
         const contextValue = {
           arg: _.drop(commandArray),
           history: cmdHistory,
           rerender,
           index,
+          cwd: historyEntry.cwd,
+          cdError: historyEntry.cdError,
           clearHistory,
         };
         return (
-          <div key={_.uniqueId(`${cmdH}_`)}>
+          <div key={_.uniqueId(`${historyEntry.cmd}_`)}>
             <div>
-              <TermInfo />
+              <TermInfo cwd={historyEntry.cwd} />
               <MobileBr />
               <MobileSpan>&#62;</MobileSpan>
-              <span data-testid="input-command">{cmdH}</span>
+              <span data-testid="input-command">{historyEntry.cmd}</span>
             </div>
             {validCommand ? (
               <termContext.Provider value={contextValue}>
                 <Output index={index} cmd={commandArray[0]} />
               </termContext.Provider>
-            ) : cmdH === "" ? (
+            ) : historyEntry.cmd === "" ? (
               <Empty />
             ) : (
               <CmdNotFound data-testid={`not-found-${index}`}>
-                command not found: {cmdH}
+                command not found: {historyEntry.cmd}
               </CmdNotFound>
             )}
           </div>
@@ -240,6 +269,32 @@ const Terminal = () => {
       })}
     </Wrapper>
   );
+};
+
+const getNextCwd = (
+  commandArray: string[],
+  cwd: string,
+  previousCwd: string
+) => {
+  if (commandArray[0] !== "cd" || commandArray.length > 2) return null;
+  const target = commandArray[1] === "-" ? previousCwd : commandArray[1];
+  const nextCwd = resolvePath(cwd, target || "~");
+  return isDirectory(nextCwd) ? nextCwd : null;
+};
+
+const getCdError = (
+  commandArray: string[],
+  cwd: string,
+  previousCwd: string
+) => {
+  if (commandArray[0] !== "cd") return undefined;
+  if (commandArray.length > 2) return "cd: too many arguments";
+
+  const target = commandArray[1] === "-" ? previousCwd : commandArray[1];
+  const nextCwd = resolvePath(cwd, target || "~");
+  return isDirectory(nextCwd)
+    ? undefined
+    : `cd: no such file or directory: ${commandArray[1]}`;
 };
 
 export default Terminal;

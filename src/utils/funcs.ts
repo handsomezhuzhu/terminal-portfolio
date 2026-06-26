@@ -2,6 +2,8 @@ import _ from "lodash";
 import theme from "../components/styles/themes";
 import { projectHints, socialHints } from "../config/profile";
 
+type HistoryLike = string | { cmd: string };
+
 /**
  * Generates html tabs
  * @param {number} num - The number of tabs
@@ -34,8 +36,12 @@ export const isArgInvalid = (
  * @param {string[]} history - The history array
  * @returns {string[]} array of cmd string
  */
-export const getCurrentCmdArry = (history: string[]) =>
-  _.split(history[0].trim(), " ");
+export const getCurrentCmdArry = (history: HistoryLike[]) => {
+  const currentCommand = history[0];
+  const commandString =
+    typeof currentCommand === "string" ? currentCommand : currentCommand.cmd;
+  return _.split(commandString.trim(), " ");
+};
 
 /**
  * Check current render makes redirect

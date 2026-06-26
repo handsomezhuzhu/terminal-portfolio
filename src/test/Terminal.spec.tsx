@@ -119,9 +119,13 @@ describe("Terminal Component", () => {
 
     const otherCmds = [
       "about",
+      "cat",
+      "cd",
       "education",
       "help",
       "history",
+      "ls",
+      "open",
       "projects",
       "socials",
       "themes",
@@ -131,6 +135,43 @@ describe("Terminal Component", () => {
         await user.type(terminalInput, `${cmd}{enter}`);
         expect(screen.getByTestId(`${cmd}`)).toBeInTheDocument();
       });
+    });
+
+    it("should list the current directory when user type 'ls' cmd", async () => {
+      await user.type(terminalInput, "ls{enter}");
+      expect(screen.getByTestId("latest-output").textContent).toContain(
+        "projects/"
+      );
+      expect(screen.getByTestId("latest-output").textContent).toContain(
+        "links/"
+      );
+    });
+
+    it("should change directory when user type 'cd projects' cmd", async () => {
+      await user.type(terminalInput, "cd projects{enter}");
+      await user.type(terminalInput, "pwd{enter}");
+      expect(screen.getByTestId("latest-output").firstChild?.textContent).toBe(
+        `${profile.homePath}/projects`
+      );
+    });
+
+    it("should keep cwd when cd target does not exist", async () => {
+      await user.type(terminalInput, "cd missing{enter}");
+      expect(screen.getByTestId("latest-output").textContent).toBe(
+        "cd: no such file or directory: missing"
+      );
+
+      await user.type(terminalInput, "pwd{enter}");
+      expect(screen.getByTestId("latest-output").firstChild?.textContent).toBe(
+        profile.homePath
+      );
+    });
+
+    it("should print file contents when user type 'cat about.txt' cmd", async () => {
+      await user.type(terminalInput, "cat about.txt{enter}");
+      expect(screen.getByTestId("latest-output").textContent).toContain(
+        "Sun Yat-sen University"
+      );
     });
   });
 
@@ -168,12 +209,19 @@ describe("Terminal Component", () => {
         expect(window.open).toHaveBeenCalled();
       });
     });
+
+    it("should open URL files when user type 'open <file>' cmd", async () => {
+      await user.type(terminalInput, "cd projects{enter}");
+      await user.type(terminalInput, "open status-probe.url{enter}");
+      expect(window.open).toHaveBeenCalledWith(projects[0].url, "_blank");
+    });
   });
 
   describe("Invalid Arguments", () => {
     const specialUsageCmds = ["themes", "socials", "projects"];
+    const fileSystemCmds = ["cat", "cd", "ls", "open"];
     const usageCmds = allCmds.filter(
-      cmd => !["echo", ...specialUsageCmds].includes(cmd)
+      cmd => !["echo", ...fileSystemCmds, ...specialUsageCmds].includes(cmd)
     );
 
     usageCmds.forEach(cmd => {

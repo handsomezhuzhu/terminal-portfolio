@@ -18,6 +18,10 @@ This fork is based on Sat Naing's MIT-licensed terminal portfolio template: http
 - `help` lists available commands
 - `welcome` displays the hero section
 - `about` shows the profile intro
+- `ls` lists files in the current virtual directory
+- `cd <path>` changes the current virtual directory
+- `cat <file>` prints a virtual file
+- `open <.url-file>` opens a virtual URL file
 - `projects` lists featured links and projects
 - `projects go <project-no>` opens a project link
 - `socials` lists useful links

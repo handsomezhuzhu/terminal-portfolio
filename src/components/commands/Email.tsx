@@ -1,18 +1,25 @@
-import { useContext } from "react";
-import _ from "lodash";
+import { useContext, useEffect } from "react";
 import { Wrapper } from "../styles/Output.styled";
 import { termContext } from "../Terminal";
 import { profile } from "../../config/profile";
+import { getCurrentCmdArry } from "../../utils/funcs";
 
 const Email: React.FC = () => {
-  const { history, rerender } = useContext(termContext);
+  const { history, index, rerender } = useContext(termContext);
 
   /* ===== get current command ===== */
-  const currentCommand = _.split(history[0], " ");
+  const currentCommand = getCurrentCmdArry(history);
 
-  if (rerender && currentCommand[0] === "email" && currentCommand.length <= 1) {
-    window.open("mailto:" + profile.email, "_self");
-  }
+  useEffect(() => {
+    if (
+      rerender &&
+      index === 0 &&
+      currentCommand[0] === "email" &&
+      currentCommand.length <= 1
+    ) {
+      window.open("mailto:" + profile.email, "_self");
+    }
+  }, [currentCommand, index, rerender]);
 
   return (
     <Wrapper>
