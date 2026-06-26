@@ -10,6 +10,10 @@ const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     border-color: theme('borderColor.DEFAULT', currentColor);
   }
 
+  :root {
+    --terminal-font: "Cascadia Mono", "Cascadia Code", "JetBrains Mono", "IBM Plex Mono", Consolas, "Liberation Mono", "Courier New", "Microsoft YaHei", monospace;
+  }
+
   blockquote, dl, dd, h1, h2, h3,
   h4, h5, h6, hr, figure, p, pre {
     margin: 0;
@@ -26,10 +30,16 @@ const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
   }
 
   body {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--terminal-font);
     font-weight: 500;
     background-color: ${({ theme }) => theme.colors?.body};
     color: ${({ theme }) => theme.colors?.text[100]};
+  }
+
+  input, button, textarea, pre, code, kbd, samp {
+    font-family: var(--terminal-font);
+    font-size: inherit;
+    font-weight: inherit;
   }
 
   /* ===== Custom Scroll Bar ===== */

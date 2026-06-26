@@ -140,9 +140,26 @@ export const listDirectory = (path: string) => {
   const node = getNode(path);
   if (!node || node.type !== "dir") return [];
 
+  return node.entries.map(entry => formatDirectoryEntry(path, entry));
+};
+
+export const formatDirectoryEntry = (directoryPath: string, entry: string) => {
+  const childPath = resolvePath(directoryPath, entry);
+  return isDirectory(childPath) ? `${entry}/` : entry;
+};
+
+export const getDirectoryEntries = (path: string) => {
+  const node = getNode(path);
+  if (!node || node.type !== "dir") return [];
+
   return node.entries.map(entry => {
     const childPath = resolvePath(path, entry);
-    return isDirectory(childPath) ? `${entry}/` : entry;
+    return {
+      name: entry,
+      displayName: formatDirectoryEntry(path, entry),
+      path: childPath,
+      node: getNode(childPath),
+    };
   });
 };
 

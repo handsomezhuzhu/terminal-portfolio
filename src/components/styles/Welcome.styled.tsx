@@ -41,7 +41,7 @@ export const PreImg = styled.pre`
   max-width: 100%;
   overflow: visible;
   white-space: pre;
-  font-family: "IBM Plex Mono", Consolas, "Courier New", monospace;
+  font-family: var(--terminal-font);
   font-size: clamp(0.45rem, 0.62vw, 0.625rem);
   line-height: 1.15;
   letter-spacing: 0;

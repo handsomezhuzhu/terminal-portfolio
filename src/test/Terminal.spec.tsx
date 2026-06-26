@@ -147,6 +147,46 @@ describe("Terminal Component", () => {
       );
     });
 
+    it("should support ls -a", async () => {
+      await user.type(terminalInput, "ls -a{enter}");
+      expect(screen.getByTestId("latest-output").textContent).toContain(".");
+      expect(screen.getByTestId("latest-output").textContent).toContain("..");
+    });
+
+    it("should support ls -l", async () => {
+      await user.type(terminalInput, "ls -l projects{enter}");
+      expect(screen.getByTestId("latest-output").textContent).toContain(
+        "-rw-r--r--"
+      );
+      expect(screen.getByTestId("latest-output").textContent).toContain(
+        "status-probe.url"
+      );
+    });
+
+    it("should support combined ls flags", async () => {
+      await user.type(terminalInput, "ls -la projects{enter}");
+      const output = screen.getByTestId("latest-output").textContent;
+      expect(output).toContain("drwxr-xr-x");
+      expect(output).toContain("status-probe.url");
+    });
+
+    it("should support ls -1", async () => {
+      await user.type(terminalInput, "ls -1 links{enter}");
+      const output = screen.getByTestId("latest-output").textContent || "";
+      expect(output.split("\n")).toEqual([
+        "github.url",
+        "email.url",
+        "website.url",
+      ]);
+    });
+
+    it("should reject unsupported ls flags", async () => {
+      await user.type(terminalInput, "ls -x{enter}");
+      expect(screen.getByTestId("latest-output").textContent).toBe(
+        "ls: invalid option -- 'x'"
+      );
+    });
+
     it("should change directory when user type 'cd projects' cmd", async () => {
       await user.type(terminalInput, "cd projects{enter}");
       await user.type(terminalInput, "pwd{enter}");
