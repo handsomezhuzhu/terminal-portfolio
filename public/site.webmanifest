@@ -1,7 +1,7 @@
 {
-  "name": "Terminal Portfolio by SN",
+  "name": "handsomezhuzhu Terminal",
   "short_name": "Terminal",
-  "description": "Sat Naing's terminal portfolio website coded with ReactJS.",
+  "description": "A terminal-style portfolio and link hub for handsomezhuzhu, a computer science undergraduate at Sun Yat-sen University.",
   "start_url": "/",
   "icons": [
     {

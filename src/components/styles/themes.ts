@@ -101,6 +101,22 @@ const theme: Themes = {
       },
     },
   },
+  fedora: {
+    id: "T_007",
+    name: "fedora",
+    colors: {
+      body: "#0B172A",
+      scrollHandle: "#1D3A5F",
+      scrollHandleHover: "#294F7A",
+      primary: "#3C6EB4",
+      secondary: "#51A2DA",
+      text: {
+        100: "#F8FAFC",
+        200: "#C6D4E1",
+        300: "#7D9CB8",
+      },
+    },
+  },
 };
 
 export default theme;

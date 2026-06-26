@@ -1,5 +1,6 @@
 import _ from "lodash";
 import theme from "../components/styles/themes";
+import { projectHints, socialHints } from "../config/profile";
 
 /**
  * Generates html tabs
@@ -46,14 +47,15 @@ export const getCurrentCmdArry = (history: string[]) =>
 export const checkRedirect = (
   rerender: boolean,
   currentCommand: string[],
-  command: string
+  command: string,
+  options = ["1", "2", "3", "4"]
 ): boolean =>
   rerender && // is submitted
   currentCommand[0] === command && // current command starts with ('socials'|'projects')
   currentCommand[1] === "go" && // first arg is 'go'
   currentCommand.length > 1 && // current command has arg
   currentCommand.length < 4 && // if num of arg is valid (not `projects go 1 sth`)
-  _.includes([1, 2, 3, 4], parseInt(currentCommand[2])); // arg last part is one of id
+  _.includes(options, currentCommand[2]); // arg last part is one of id
 
 /**
  * Check current render makes redirect for theme
@@ -134,7 +136,7 @@ export const argTab = (
 
   // 7) if input is 'socials go '
   else if (_.startsWith(inputVal, "socials go ")) {
-    ["1.Github", "2.Dev.to", "3.Facebook", "4.Instagram"].forEach(t => {
+    socialHints.forEach(t => {
       hintsCmds = [...hintsCmds, t];
     });
     return hintsCmds;
@@ -142,12 +144,7 @@ export const argTab = (
 
   // 8) if input is 'projects go '
   else if (_.startsWith(inputVal, "projects go ")) {
-    [
-      "1.Sat Naing's Blog",
-      "2.Haru Fashion",
-      "3.Haru API",
-      "4.AstroPaper Blog Theme",
-    ].forEach(t => {
+    projectHints.forEach(t => {
       hintsCmds = [...hintsCmds, t];
     });
     return hintsCmds;

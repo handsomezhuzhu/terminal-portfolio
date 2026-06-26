@@ -14,6 +14,7 @@ import Themes from "./commands/Themes";
 import { OutputContainer, UsageDiv } from "./styles/Output.styled";
 import { termContext } from "./Terminal";
 import { useContext } from "react";
+import { profile } from "../config/profile";
 
 type Props = {
   index: number;
@@ -43,11 +44,11 @@ const Output: React.FC<Props> = ({ index, cmd }) => {
           help: <Help />,
           history: <History />,
           projects: <Projects />,
-          pwd: <GeneralOutput>/home/satnaing</GeneralOutput>,
+          pwd: <GeneralOutput>{profile.homePath}</GeneralOutput>,
           socials: <Socials />,
           themes: <Themes />,
           welcome: <Welcome />,
-          whoami: <GeneralOutput>visitor</GeneralOutput>,
+          whoami: <GeneralOutput>{profile.currentUser}</GeneralOutput>,
         }[cmd]
       }
     </OutputContainer>

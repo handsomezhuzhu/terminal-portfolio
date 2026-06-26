@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import _ from "lodash";
 import { termContext } from "../Terminal";
+import { profile } from "../../config/profile";
 
 const Gui: React.FC = () => {
   const { history, rerender } = useContext(termContext);
@@ -10,7 +11,7 @@ const Gui: React.FC = () => {
 
   /* ===== check current command makes redirect ===== */
   if (rerender && currentCommand[0] === "gui") {
-    window.open("https://satnaing.dev/", "_blank");
+    window.open(profile.guiUrl, "_blank");
   }
 
   return <span></span>;

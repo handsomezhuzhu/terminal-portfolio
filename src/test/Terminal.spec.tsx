@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { UserEvent } from "@testing-library/user-event/dist/types/setup/setup";
 import { render, screen, userEvent } from "../utils/test-utils";
 import Terminal, { commands } from "../components/Terminal";
+import { profile, projects, socials } from "../config/profile";
 
 // setup function
 function setup(jsx: JSX.Element) {
@@ -54,10 +55,10 @@ describe("Terminal Component", () => {
       );
     });
 
-    it("should return '/home/satnaing' when user type 'pwd' cmd", async () => {
+    it("should return the configured home path when user type 'pwd' cmd", async () => {
       await user.type(terminalInput, "pwd{enter}");
       expect(screen.getByTestId("latest-output").firstChild?.textContent).toBe(
-        "/home/satnaing"
+        profile.homePath
       );
     });
 
@@ -150,21 +151,20 @@ describe("Terminal Component", () => {
       await user.type(terminalInput, "email{enter}");
       expect(window.open).toHaveBeenCalled();
       expect(screen.getByTestId("latest-output").firstChild?.textContent).toBe(
-        "contact@satnaing.dev"
+        profile.email
       );
     });
 
-    const nums = [1, 2, 3, 4];
-    nums.forEach(num => {
-      it(`should redirect to project URL when user type 'projects go ${num}' cmd`, async () => {
-        await user.type(terminalInput, `projects go ${num}{enter}`);
+    projects.forEach(({ id }) => {
+      it(`should redirect to project URL when user type 'projects go ${id}' cmd`, async () => {
+        await user.type(terminalInput, `projects go ${id}{enter}`);
         expect(window.open).toHaveBeenCalled();
       });
     });
 
-    nums.forEach(num => {
-      it(`should redirect to social media when user type 'socials go ${num}' cmd`, async () => {
-        await user.type(terminalInput, `socials go ${num}{enter}`);
+    socials.forEach(({ id }) => {
+      it(`should redirect to social link when user type 'socials go ${id}' cmd`, async () => {
+        await user.type(terminalInput, `socials go ${id}{enter}`);
         expect(window.open).toHaveBeenCalled();
       });
     });
@@ -202,8 +202,8 @@ describe("Terminal Component", () => {
         window.open = vi.fn();
 
         // firstly run commands correct options
-        await user.type(terminalInput, `projects go 4{enter}`);
-        await user.type(terminalInput, `socials go 4{enter}`);
+        await user.type(terminalInput, `projects go ${projects[0].id}{enter}`);
+        await user.type(terminalInput, `socials go ${socials[0].id}{enter}`);
         await user.type(terminalInput, `themes set espresso{enter}`);
 
         // then run cmd with incorrect options

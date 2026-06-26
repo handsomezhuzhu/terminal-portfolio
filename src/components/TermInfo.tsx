@@ -1,9 +1,11 @@
 import { User, WebsiteName, Wrapper } from "./styles/TerminalInfo.styled";
+import { profile } from "../config/profile";
 
 const TermInfo = () => {
   return (
     <Wrapper>
-      <User>visitor</User>@<WebsiteName>terminal.satnaing.dev</WebsiteName>:~$
+      <User>{profile.promptUser}</User>@
+      <WebsiteName>{profile.siteHost}</WebsiteName>:~$
     </Wrapper>
   );
 };

@@ -3,20 +3,21 @@ import {
   HighlightAlt,
   HighlightSpan,
 } from "../styles/About.styled";
+import { profile } from "../../config/profile";
 
 const About: React.FC = () => {
   return (
     <AboutWrapper data-testid="about">
       <p>
-        Hi, my name is <HighlightSpan>Sat Naing</HighlightSpan>!
+        Hi, this is <HighlightSpan>{profile.displayName}</HighlightSpan>.
       </p>
       <p>
-        I'm <HighlightAlt>a full-stack developer</HighlightAlt> based in Yangon,
-        Myanmar.
+        I'm an <HighlightAlt>{profile.role}</HighlightAlt> based in{" "}
+        {profile.location}.
       </p>
       <p>
-        I am passionate about writing codes and <br />
-        developing web applications to solve real-life challenges.
+        This terminal is a small entry point to my services, experiments, and
+        contact information.
       </p>
     </AboutWrapper>
   );
