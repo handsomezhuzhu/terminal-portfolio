@@ -286,6 +286,28 @@ describe("Terminal Component", () => {
       expect(screen.getByTestId("terminal-wrapper").children.length).toBe(1);
     });
 
+    it("should autocomplete directory paths for cd", async () => {
+      await user.type(terminalInput, "cd p");
+      await user.tab();
+      expect(terminalInput.value).toBe("cd projects/");
+    });
+
+    it("should autocomplete file paths for cat", async () => {
+      await user.type(terminalInput, "cat a");
+      await user.tab();
+      expect(terminalInput.value).toBe("cat about.txt");
+    });
+
+    it("should autocomplete nested URL paths for open", async () => {
+      await user.type(terminalInput, "open l");
+      await user.tab();
+      expect(terminalInput.value).toBe("open links/");
+
+      await user.type(terminalInput, "g");
+      await user.tab();
+      expect(terminalInput.value).toBe("open links/github.url");
+    });
+
     it("should go to previous back and forth when 'Up & Down Arrow' is pressed", async () => {
       await user.type(terminalInput, "about{enter}");
       await user.type(terminalInput, "whoami{enter}");

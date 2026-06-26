@@ -144,7 +144,13 @@ const Terminal = () => {
         }
       });
 
-      const returnedHints = argTab(inputVal, setInputVal, setHints, hintsCmds);
+      const returnedHints = argTab(
+        inputVal,
+        setInputVal,
+        setHints,
+        hintsCmds,
+        cwd
+      );
       hintsCmds = returnedHints ? [...hintsCmds, ...returnedHints] : hintsCmds;
 
       // if there are many command to autocomplete

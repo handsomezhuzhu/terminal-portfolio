@@ -1,5 +1,12 @@
 import _ from "lodash";
 import theme from "../components/styles/themes";
+import {
+  getFileUrl,
+  getNode,
+  isDirectory,
+  listDirectory,
+  resolvePath,
+} from "../config/filesystem";
 import { projectHints, socialHints } from "../config/profile";
 
 type HistoryLike = string | { cmd: string };
@@ -94,8 +101,20 @@ export const argTab = (
   inputVal: string,
   setInputVal: (value: React.SetStateAction<string>) => void,
   setHints: (value: React.SetStateAction<string[]>) => void,
-  hintsCmds: string[]
+  hintsCmds: string[],
+  cwd: string
 ): string[] | undefined => {
+  const pathCompletion = completePathArg(inputVal, cwd);
+  if (pathCompletion) {
+    if (pathCompletion.value) {
+      setInputVal(pathCompletion.value);
+      setHints([]);
+    } else {
+      setHints(pathCompletion.hints);
+    }
+    return [];
+  }
+
   // 1) if input is 'themes '
   if (inputVal === "themes ") {
     setInputVal(`themes set`);
@@ -155,4 +174,67 @@ export const argTab = (
     });
     return hintsCmds;
   }
+};
+
+type PathCompletion = {
+  value?: string;
+  hints: string[];
+};
+
+const pathCommands = ["cat", "cd", "ls", "open"];
+
+const completePathArg = (
+  inputVal: string,
+  cwd: string
+): PathCompletion | null => {
+  const command = _.split(inputVal, " ")[0];
+  if (!pathCommands.includes(command) || !inputVal.startsWith(`${command} `)) {
+    return null;
+  }
+
+  const rawPath = inputVal.slice(command.length + 1);
+  if (rawPath.includes(" ")) return null;
+
+  const lastSlashIndex = rawPath.lastIndexOf("/");
+  const baseTarget =
+    lastSlashIndex === -1 ? "" : rawPath.slice(0, lastSlashIndex + 1);
+  const prefix =
+    lastSlashIndex === -1 ? rawPath : rawPath.slice(lastSlashIndex + 1);
+  const basePath = resolvePath(cwd, baseTarget || ".");
+  const baseNode = getNode(basePath);
+
+  if (!baseNode || baseNode.type !== "dir") return null;
+
+  const candidates = listDirectory(basePath)
+    .filter(entry => entry.startsWith(prefix))
+    .filter(entry => isAllowedPathCandidate(command, basePath, entry));
+
+  if (candidates.length === 0) return null;
+
+  const completions = candidates.map(entry => `${baseTarget}${entry}`);
+
+  if (completions.length === 1) {
+    return {
+      value: `${command} ${completions[0]}`,
+      hints: [],
+    };
+  }
+
+  return {
+    hints: completions,
+  };
+};
+
+const isAllowedPathCandidate = (
+  command: string,
+  basePath: string,
+  entry: string
+) => {
+  const entryPath = resolvePath(basePath, entry.replace(/\/$/, ""));
+  const isDir = isDirectory(entryPath);
+
+  if (command === "cd") return isDir;
+  if (command === "open") return isDir || Boolean(getFileUrl(entryPath));
+
+  return true;
 };
