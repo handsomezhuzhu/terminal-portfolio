@@ -6,7 +6,7 @@ export const profile = {
   siteName: "handsomezhuzhu Terminal",
   siteDescription:
     "A terminal-style portfolio and link hub for handsomezhuzhu, a computer science undergraduate at Sun Yat-sen University.",
-  siteUrl: "https://about.zhuzihan.com/",
+  siteUrl: "https://zzh6.com/",
   siteHost: "zhuzihan.com",
   repoUrl: "https://github.com/handsomezhuzhu/terminal-portfolio",
   originalRepoUrl: "https://github.com/satnaing/terminal-portfolio",
