@@ -61,7 +61,7 @@ export const socials = [
   {
     id: 3,
     title: "Website",
-    url: profile.siteUrl,
+    url: profile.guiUrl,
     tab: 2,
   },
 ];
