@@ -42,7 +42,7 @@ export const PreImg = styled.pre`
   overflow: visible;
   white-space: pre;
   font-family: var(--terminal-font);
-  font-size: clamp(0.45rem, 0.62vw, 0.625rem);
+  font-size: clamp(0.65rem, 0.95vw, 0.95rem);
   line-height: 1.15;
   letter-spacing: 0;
 
